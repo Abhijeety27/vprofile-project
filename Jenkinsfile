@@ -1,8 +1,9 @@
 pipeline {
     agent any
     tools {
-        maven "MAVEN3.9"
-        jdk "OracleJDK17"
+         maven "MAVEN3.9"
+        jdk "JDK17"
+
     }
     
     environment {
@@ -11,8 +12,7 @@ pipeline {
 		NEXUS_PASS = 'admin123'
 		RELEASE_REPO = 'vprofile-release'
 		CENTRAL_REPO = 'vpro-maven-central'
-        // use private ip of NexusServer Instance
-		NEXUSIP = '172.31.46.93'
+		NEXUSIP = '172.31.5.4'
 		NEXUSPORT = '8081'
 		NEXUS_GRP_REPO = 'vpro-maven-group'
         NEXUS_LOGIN = 'nexuslogin'
@@ -27,7 +27,7 @@ pipeline {
             }
             post {
                 success {
-                    echo "now Archieving"
+                    echo "Now Archiving."
                     archiveArtifacts artifacts: '**/*.war'
                 }
             }
@@ -37,10 +37,11 @@ pipeline {
             steps {
                 sh 'mvn -s settings.xml test'
             }
+
         }
 
         stage('Checkstyle Analysis'){
-            steps{
+            steps {
                 sh 'mvn -s settings.xml checkstyle:checkstyle'
             }
         }
