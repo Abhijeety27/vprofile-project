@@ -11,7 +11,7 @@ pipeline {
 		NEXUS_PASS = 'admin123'
 		RELEASE_REPO = 'vprofile-release'
 		CENTRAL_REPO = 'vpro-maven-central'
-        // use private ip of NexusServer Instance
+         // use private ip of NexusServer Instance
 		NEXUSIP = '172.31.41.250'
 		NEXUSPORT = '8081'
 		NEXUS_GRP_REPO = 'vpro-maven-group'
@@ -27,7 +27,7 @@ pipeline {
             }
             post {
                 success {
-                    echo "now Archieving"
+                    echo "Now Archiving."
                     archiveArtifacts artifacts: '**/*.war'
                 }
             }
@@ -37,10 +37,11 @@ pipeline {
             steps {
                 sh 'mvn -s settings.xml test'
             }
+
         }
 
         stage('Checkstyle Analysis'){
-            steps{
+            steps {
                 sh 'mvn -s settings.xml checkstyle:checkstyle'
             }
         }
@@ -62,7 +63,7 @@ pipeline {
               }
             }
         }
-        //Added without practical
+
         stage("Quality Gate") {
             steps {
                 timeout(time: 1, unit: 'HOURS') {
@@ -70,6 +71,26 @@ pipeline {
                     // true = set pipeline to UNSTABLE, false = don't
                     waitForQualityGate abortPipeline: true
                 }
+            }
+        }
+
+        stage("UploadArtifact"){
+            steps{
+                nexusArtifactUploader(
+                  nexusVersion: 'nexus3',
+                  protocol: 'http',
+                  nexusUrl: "${NEXUSIP}:${NEXUSPORT}",
+                  groupId: 'QA',
+                  version: "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}",
+                  repository: "${RELEASE_REPO}",
+                  credentialsId: "${NEXUS_LOGIN}",
+                  artifacts: [
+                    [artifactId: 'vproapp',
+                     classifier: '',
+                     file: 'target/vprofile-v2.war',
+                     type: 'war']
+                  ]
+                )
             }
         }
     }
