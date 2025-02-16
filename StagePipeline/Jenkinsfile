@@ -21,6 +21,8 @@ pipeline {
         registryCredential = 'ecr:ap-south-1:awscreds'
         appRegistry = '767397718793.dkr.ecr.ap-south-1.amazonaws.com/vprofileappimg'
         vprofileRegistry = 'https://767397718793.dkr.ecr.ap-south-1.amazonaws.com'
+        cluster = 'vprostaging'
+        service = 'vproappstagesvc'
     }
 
     stages {
@@ -114,6 +116,14 @@ pipeline {
               }
             }
           }
+        }
+
+        stage('Deploy to ECS staging') {
+            steps {
+                withAWS(credentials: 'awscreds', region: 'ap-south-1') {
+                    sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
+                } 
+            }
         }
 
 
